@@ -14,12 +14,18 @@ RUN systemctl mask dev-mqueue.mount dev-hugepages.mount \
 ADD dbus.service /etc/systemd/system/dbus.service
 RUN systemctl enable dbus.service
 
-#RUN yum -y install passwd; yum clean all
-#RUN echo root | passwd --stdin root
+# Setup kitchen user with passwordless sudo 
+RUN useradd -d /home/kitchen -m -s /bin/bash kitchen && \ 
+    (echo kitchen:kitchen | chpasswd) && \ 
+    mkdir -p /etc/sudoers.d && \ 
+    echo 'kitchen ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/kitchen && \ 
 
-#RUN yum -y install openssh-server initscripts; yum clean all
-#RUN echo "UseDNS no" >> /etc/ssh/sshd_config
-#RUN sed -i 's/UsePrivilegeSeparation sandbox/UsePrivilegeSeparation no/' /etc/ssh/sshd_config
+    # Setup SSH daemon so test-kitchen can access the container 
+    yum -y install openssh-server openssh-clients && \ 
+    ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -N '' && \ 
+    ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \ 
+    echo 'OPTIONS="-o UseDNS=no -o UsePAM=no -o PasswordAuthentication=yes"' >> /etc/sysconfig/sshd && \ 
+    systemctl enable sshd.service 
 
 VOLUME ["/sys/fs/cgroup"]
 VOLUME ["/run"]

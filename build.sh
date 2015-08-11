@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sudo docker build --rm -t maci/systemd .
+sudo docker build --rm -t kitchen/centos7 .
