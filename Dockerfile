@@ -25,7 +25,11 @@ RUN useradd -d /home/kitchen -m -s /bin/bash kitchen && \
     ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -N '' && \ 
     ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \ 
     echo 'OPTIONS="-o UseDNS=no -o UsePAM=no -o PasswordAuthentication=yes"' >> /etc/sysconfig/sshd && \ 
-    systemctl enable sshd.service 
+    systemctl enable sshd.service && \
+
+    # Setup crond
+    yum -y install cronie && \
+    systemctl enable crond.service
 
 VOLUME ["/sys/fs/cgroup"]
 VOLUME ["/run"]
